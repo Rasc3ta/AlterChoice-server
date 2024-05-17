@@ -4,8 +4,14 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express());
+app.use(
+  cors({
+    // origin: ["http://localhost:5173"],
+    origin: "*",
+    credentials: true,
+  })
+);
+app.use(express.json());
 
 const USER = process.env.DB_NAME;
 const PASS = process.env.DB_PASS;
@@ -31,6 +37,26 @@ async function run() {
     // console.log(
     //   "Pinged your deployment. You successfully connected to MongoDB!"
     // );
+
+    const alterChoice = client.db("alterChoiceDB");
+
+    const queries = alterChoice.collection("queries");
+
+    app.get("/queries", async (req, res) => {
+      const options = {
+        sort: { recommendationCount: -1 },
+      };
+
+      const cursor = await queries.find({}, options).toArray();
+      res.send(cursor);
+    });
+
+    app.post("/addQuery", async (req, res) => {
+      const query = req.body;
+      //   console.log(query);
+      const result = await queries.insertOne(query);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
