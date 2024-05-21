@@ -42,6 +42,19 @@ async function run() {
 
     const queries = alterChoice.collection("queries");
 
+    // home page :
+
+    app.get("/newSix", async (req, res) => {
+      const options = {
+        sort: { dateTime: -1 },
+      };
+
+      const cursor = await queries.find({}, options).limit(6).toArray();
+      res.send(cursor);
+    });
+
+    //all queries page :
+
     app.get("/queries", async (req, res) => {
       const options = {
         sort: { recommendationCount: -1 },
@@ -56,6 +69,28 @@ async function run() {
       //   console.log(query);
       const result = await queries.insertOne(query);
       res.send(result);
+    });
+
+    // my queries
+
+    app.get("/myQueries", async (req, res) => {
+      const { email } = req.query;
+      const options = {
+        sort: { dateTime: -1 },
+      };
+
+      const cursor = await queries.find({ email: email }, options).toArray();
+      res.send(cursor);
+    });
+
+    app.delete("/deleteQuery", async (req, res) => {
+      const title = req.query.title;
+
+      const query = { queryTile: title };
+      // console.log(query);
+
+      const result = await queries.deleteOne(query);
+      res.send(result)
     });
   } finally {
     // Ensures that the client will close when you finish/error
