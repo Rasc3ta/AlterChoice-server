@@ -71,7 +71,7 @@ async function run() {
       res.send(result);
     });
 
-    // my queries
+    // my queries.
 
     app.get("/myQueries", async (req, res) => {
       const { email } = req.query;
