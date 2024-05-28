@@ -90,7 +90,47 @@ async function run() {
       // console.log(query);
 
       const result = await queries.deleteOne(query);
-      res.send(result)
+      res.send(result);
+    });
+
+    app.patch("/updateQuery", async (req, res) => {
+      const {
+        productName,
+        brandName,
+        productImage,
+        queryTile,
+        boycottReason,
+        email,
+        name,
+        userImage,
+        dateTime,
+        recommendationCount,
+      } = req.body.query;
+
+        const oldTitle  = req.body.oldTitle;
+
+      const filter = { queryTile:oldTitle };
+      console.log(oldTitle)
+
+      const options = { upsert: false };
+
+      const updateDoc = {
+        $set: {
+          productName,
+          brandName,
+          productImage,
+          queryTile,
+          boycottReason,
+          dateTime,
+          recommendationCount,
+        },
+      };
+
+      const result = await queries.updateOne(filter, updateDoc,options);
+
+      res.send(result);
+      // console.log(result);
+
     });
   } finally {
     // Ensures that the client will close when you finish/error
