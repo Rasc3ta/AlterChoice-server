@@ -41,6 +41,7 @@ async function run() {
     const alterChoice = client.db("alterChoiceDB");
 
     const queries = alterChoice.collection("queries");
+    const recommendations = alterChoice.collection("recommendations");
 
     // home page :
 
@@ -107,10 +108,10 @@ async function run() {
         recommendationCount,
       } = req.body.query;
 
-        const oldTitle  = req.body.oldTitle;
+      const oldTitle = req.body.oldTitle;
 
-      const filter = { queryTile:oldTitle };
-      console.log(oldTitle)
+      const filter = { queryTile: oldTitle };
+      console.log(oldTitle);
 
       const options = { upsert: false };
 
@@ -126,26 +127,44 @@ async function run() {
         },
       };
 
-      const result = await queries.updateOne(filter, updateDoc,options);
+      const result = await queries.updateOne(filter, updateDoc, options);
 
       res.send(result);
       // console.log(result);
-
     });
 
-    // query details : 
+    // query details :
 
-    app.get("/query/:id", async(req,res)=>{
+    app.get("/query/:id", async (req, res) => {
       const id = req.params.id;
 
-      const filter = {_id: new ObjectId(id)};
+      const filter = { _id: new ObjectId(id) };
 
       const query = await queries.findOne(filter);
       res.send(query);
-      
-      
-    })
+    });
 
+    app.get("/allRec/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const query = { queryId: id};
+
+      const cursor = await recommendations.find(query).toArray();
+      res.send(cursor);
+
+    });
+
+    app.post("/postRec", async (req, res) => {
+      const recommendation = req.body;
+      const result = await recommendations.insertOne(recommendation);
+
+      const updateRecCount = await queries.updateOne(
+        { queryTile: recommendation.queryTile },
+        { $inc: { recommendationCount: 1 } }
+      );
+      // console.log(updateRecCount);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
