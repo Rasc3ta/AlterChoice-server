@@ -144,14 +144,15 @@ async function run() {
       res.send(query);
     });
 
+    // recommendations related apis
+
     app.get("/allRec/:id", async (req, res) => {
       const id = req.params.id;
 
-      const query = { queryId: id};
+      const query = { queryId: id };
 
       const cursor = await recommendations.find(query).toArray();
       res.send(cursor);
-
     });
 
     app.post("/postRec", async (req, res) => {
@@ -165,6 +166,30 @@ async function run() {
       // console.log(updateRecCount);
       res.send(result);
     });
+
+    app.delete("/delete", async (req, res) => {
+      const { recTitle, queryTitle } = req.query;
+
+      const result = await recommendations.deleteOne({ recTitle: recTitle });
+
+      const updateRecCount = await queries.updateOne(
+        { queryTile: queryTitle },
+        { $inc: { recommendationCount: -1 } }
+      );
+
+      res.send(result);
+    });
+
+    app.get("/myRecs/:email", async (req, res) => {
+      const email = req.params.email;
+
+      const query = { "recommender.recEmail": email };
+
+      const cursor = await recommendations.find(query).toArray();
+      res.send(cursor);
+    });
+
+    
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
