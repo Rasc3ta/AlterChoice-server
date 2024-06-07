@@ -189,7 +189,16 @@ async function run() {
       res.send(cursor);
     });
 
-    
+    // recommendations for me page api:
+
+    app.get("/recsForMe/:email", async (req, res) => {
+      const email = req.params.email;
+
+      const filter = { "queryAuthor.email": email };
+
+      const cursor = await recommendations.find(filter).toArray();
+      res.send(cursor);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
